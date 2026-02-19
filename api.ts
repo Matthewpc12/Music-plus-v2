@@ -174,8 +174,14 @@ export const api = {
         const res = await fetch(`${SERVER_URL}/api/metadata/${encodeURIComponent(filename)}`);
         if (!res.ok) throw new Error('Failed to fetch metadata');
         const data = await res.json();
+        
+        let coverUrl = undefined;
+        if (data.cover) {
+            coverUrl = `data:image/jpeg;base64,${data.cover}`;
+        }
+
         return { 
-            cover: data.picture, // Base64 string from server
+            cover: coverUrl, 
             title: data.title,
             artist: data.artist
         };
@@ -318,27 +324,6 @@ export const api = {
       }
   },
 
-  getArtwork: async (artist: string, album: string): Promise<string | null> => {
-    if (!artist || !album || artist === 'Unknown Artist' || album === 'Unknown Album') return null;
-
-    try {
-      const query = encodeURIComponent(`${artist} ${album}`);
-      const res = await fetch(`https://itunes.apple.com/search?term=${query}&media=music&entity=album&limit=1`);
-      
-      if (!res.ok) return null;
-      
-      const data = await res.json();
-      
-      if (data.resultCount > 0 && data.results[0].artworkUrl100) {
-         return data.results[0].artworkUrl100.replace('100x100bb', '1000x1000bb');
-      }
-      return null;
-    } catch (e) {
-      console.warn('iTunes Artwork Fetch failed:', e);
-      return null;
-    }
-  },
-
   searchTracks: async (term: string): Promise<any[]> => {
       if (!term) return [];
       try {
@@ -349,21 +334,5 @@ export const api = {
           console.error("Search failed", e);
           return [];
       }
-  },
-
-  fetchImageAsBase64: async (url: string): Promise<string> => {
-    try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(blob);
-        });
-    } catch (e) {
-        console.error("Failed to convert image to base64", e);
-        throw e;
-    }
   }
 };

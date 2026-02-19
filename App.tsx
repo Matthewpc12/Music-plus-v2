@@ -165,23 +165,6 @@ const App: React.FC = () => {
                 // ID3 fetch failed or no cover
             }
 
-            // 2. If no ID3 cover, Try iTunes API
-            if (!finalCover) {
-                const isGeneric = song.artist === 'Unknown Artist' || song.album === 'Unknown Album';
-                if (!isGeneric) {
-                    try {
-                        const iTunesUrl = await api.getArtwork(song.artist, song.album);
-                        if (iTunesUrl) {
-                            // Fetch and convert to Base64 to store offline in IndexedDB
-                            // This ensures we satisfy the requirement "save to local storage"
-                            finalCover = await api.fetchImageAsBase64(iTunesUrl);
-                        }
-                    } catch (err) {
-                        console.warn(`iTunes fetch failed for ${song.artist} - ${song.album}`, err);
-                    }
-                }
-            }
-            
             if (finalCover) {
                 const cacheKey = getAlbumCacheKey(song.artist, song.album, song.filename);
                 

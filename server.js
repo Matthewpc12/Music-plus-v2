@@ -165,11 +165,11 @@ app.get('/api/metadata/:filename', async (req, res) => {
         }
         
         const metadata = await mm.parseFile(filepath);
-        let pictureBase64 = null;
+        let coverBase64 = null;
         const picture = metadata.common.picture?.[0];
         
         if (picture) {
-             pictureBase64 = `data:${picture.format};base64,${picture.data.toString('base64')}`;
+             coverBase64 = picture.data.toString('base64');
         }
 
         res.json({
@@ -177,7 +177,7 @@ app.get('/api/metadata/:filename', async (req, res) => {
             artist: metadata.common.artist,
             album: metadata.common.album,
             duration: metadata.format.duration,
-            picture: pictureBase64
+            cover: coverBase64
         });
     } catch (e) {
         console.error("Metadata error:", e);
